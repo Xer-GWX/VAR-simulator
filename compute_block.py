@@ -60,23 +60,31 @@ class Compute_Layer():
         C_block,C_block_num = self._block_parition(self.C,[self.block_size_m,self.block_size_n])
 
         for i in range(A_block_num[0]):
-            for j in range(A_block_num[1]):
-                for l in range(B_block_num[1]):
+            # 再写一下每一行 查一下
+            for j in range(B_block_num[1]):#48
+                tile_execute_list = [] # tile类的列表
+                for l in range(A_block_num[1]):#16
                     # load 1个 tile
-                    compute_AB_tile_id = AB_block_allocation[math.floor(j/self.block_size_n)][math.floor(l/self.block_size_k)][0]#tile 0 
+                    compute_AB_tile_id = AB_block_allocation[j][l][0]#tile 0 
                     tile_execute = self.hardware.Tile_groups[self.fusion_group_id][compute_AB_tile_id] #这里得到计算1个A_block*1个B_block的那1个tile
-                    
                     # 这里需要继续分小小块计算,首先split得到合适的
                     # 计算最佳的分块维度(4,64,64)-->(1,4,32) 
                     # TODO：这里只考虑了compute_capacity还没有考虑bank_capacity的事情，需要重新写一下calculate_split,
                     # TODO:进一步得到FI_bank_num, Param_bank_num, FO_bank_num，Param_dram的值
-                    parition_mini_shape = self._calculate_splits(A_block[i][j], B_block[j][l])
-                    self._execute_block_mini(parition_mini_shape,A_block[i][j], B_block[j][l],C_block[i][l],tile_execute) 
-                    # TODO：这里衔接处需要写一下pipe
-                    #C_block +=  加一下这里，其他应该就是查一下tile_execute分的对不对
-                
-                    #在这里draw/draw_sample一下，即得到图
-                    draw_sample(self.hardware,self.fusion_group_id,compute_AB_tile_id)
+                    parition_mini_shape = self._calculate_splits(A_block[i][l], B_block[l][j])
+                    self._execute_block_mini(parition_mini_shape,A_block[i][l], B_block[l][j],C_block[i][j],tile_execute) 
+                    if tile_execute not in tile_execute_list:
+                        tile_execute_list.append(tile_execute)                    #在这里draw/draw_sample一下，即得到图
+                    #draw_sample(self.hardware,self.fusion_group_id,compute_AB_tile_id)
+                    # 这里不需要再写这个，因为只要该tile之前存过计算time的信息等，就会一直有add处理 okTODO：这里衔接处需要写一下pipe
+                    # C_block +=  加一下这里，其他应该就是查一下tile_execute分的对不对
+                # 使用树形结构整合多个tile的结果 okTODO：有些问题这里，应该是不断地传小小块过去计算
+                merged_result = self._merge_tile_results(parition_mini_shape,tile_execute_list,C_block[i][j])
+                # 所以相当于  TODO: 我需不需要先列出来每个tensor的相关计算时间和所在位置
+                # okTODO: 还需要再check一下 还要不要split小小块了，如果split的话，tile通信没法写进同一个process？
+                # Noc通信有一个列表在
+                draw(self.hardware,self.fusion_group_id,48)
+                print(1)
 
     def _execute_attention_MM(self,):
         assert len(self.Layer_config.input)==2 
@@ -84,7 +92,30 @@ class Compute_Layer():
             self.A = self.Layer_config.input[0]
             self.B = self.Layer_config.input[1]
 
-    
+    def _merge_tile_results(self, parition_mini_shape: list[int], partial_results:list[Tile],dstensor:Data_Split_Tensor):
+        # 基本情况：当结果数组只剩一个时，返回该结果
+        if len(partial_results) == 1:
+            return partial_results[0]
+
+        # 递归地合并每一对结果 dstensor?
+        merged = []
+        for i in range(0, len(partial_results), 2):
+            if i + 1 < len(partial_results):
+                # noc + add 计算的过程
+                # 这里execute_mini_block，dstensor
+                rows_split, cols_split, cols_B_split = parition_mini_shape
+                C_sub_block,C_sub_block_num = self._block_parition(dstensor,[rows_split, cols_B_split])
+                for j in range(C_sub_block_num[0]):
+                    for k in range(C_sub_block_num[1]):
+                        merged_result_tile =  self.hardware.merge(C_sub_block[j][k],partial_results[i],partial_results[i+1],self.op)
+                #self._add(partial_results[i], partial_results[i + 1])  # 两两合并 process
+                merged.append(merged_result_tile)
+            else:
+                merged.append(partial_results[i])  # 如果只剩下一个元素，没有配对，则直接加入
+
+        # 递归调用自己，继续合并剩余的部分结果
+        return self._merge_tile_results(parition_mini_shape,merged,dstensor)
+
     def _execute_block_mini(self, parition_mini_shape,A_block: Data_Split_Tensor, B_block: Data_Split_Tensor,C_block: Data_Split_Tensor,tile_execute:Tile):
         
         rows_split, cols_split, cols_B_split = parition_mini_shape
@@ -97,8 +128,8 @@ class Compute_Layer():
         for i in range(A_sub_block_num[0]):
             for j in range(A_sub_block_num[1]):
                 for l in range(B_sub_block_num[1]):
-                    hbm = self.hardware.HBM # TODO:这里怎么写比较好
-                    self.hardware.process(A_sub_block[i][j],B_sub_block[j][l],C_sub_block[i][l],tile_execute,hbm,self.op)
+                    # hbm = self.hardware.HBM # ok了TODO:这里怎么写比较好
+                    self.hardware.process(A_sub_block[i][j],B_sub_block[j][l],C_sub_block[i][l],tile_execute,self.op)
                     
        
     def _allocate_tiles_to_blocks_unit(self,tile_ids, num_blocks):

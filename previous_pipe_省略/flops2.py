@@ -102,9 +102,10 @@ import matplotlib.pyplot as plt
 # plt.show()
 
 
-B=1
-L=[1, 4, 9, 16, 25, 36, 64, 100, 169, 256]
-
+B=8
+#L=[1, 4, 9, 16, 25, 36, 64, 100, 169, 256]
+L1=[1, 4, 9, 16, 25, 36, 64, 100, 169, 256]
+L=[L1[i]*256 for i in range(len(L1))]
 print(L)
 D=1920
 E=16
@@ -158,7 +159,7 @@ for i in range(10):
         y_mem.append(B*L[i+1]*E+E*D)
     
     L_base+=L[i]
-print(y_flops)
+# print(y_flops)
 #print(y_flops[310]/y_mem[310]/2)
 #y_mem=[i * 2 for i in y_mem]
 #cumulative_list = [sum(y_mem[:i+1]) for i in range(len(y_mem))]
@@ -196,90 +197,92 @@ print(y_flops)
 #     b.append(a[i]-a[i-1])
 # print(b)
 
-num1=[]
-num2=[]
-# quant convin mid
-num1.append(len(y_flops))
-num1.append(len(y_flops)+1)
-num1.append(len(y_flops)+2)
-temp4=[2*B*E**2*K**2*W*H,2*B*E*C*K**2*W*H,2*B*C**2*W*H*9,2*B*C**2*W*H*9,6*B*C**2*W*H,2*B*H**2*W**2*C,B*H**2*W**2*C,2*B*C**2*W*H,2*B*C**2*W*H*9,2*B*C**2*W*H*9]
-temp_w4=[E**2*K**2,E*C*K**2,C**2*K**2,C**2*K**2,3*C**2,B*C*H*W,B*H**2*W**2,C**2,C**2*K**2,C**2*K**2]
-temp_i4=[B*E*W*H,B*E*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H]
-temp_m4=[x + y for x, y in zip(temp_w4, temp_i4)]
-y_flops.extend(temp4)
-y_mem.extend(temp_m4)
-print(len(y_flops),len(y_mem))
-#6K^2C^2+12C^2+12BCHW
-# up s4
-num.append(len(y_flops))
-temp5=[2*B*C**2*W*H*9,2*B*C**2*W*H*9,6*B*C**2*W*H,2*B*H**2*W**2*C,B*H**2*W**2*C,2*B*C**2*W*H]
-temp_w5=[C**2*K**2,C**2*K**2,3*C**2,B*C*H*W,B*H**2*W**2,C**2]
-temp_i5=[B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H]
-temp_m5=[x + y for x, y in zip(temp_w5, temp_i5)]
-for j in range(3):
-    y_flops.extend(temp5)
-    y_mem.extend(temp_m5)
-y_flops.append(8*B*C**2*W*H*9)
-y_mem.append(C**2*K**2+B*C*W*H)
-print(len(y_flops),len(y_mem))
-#up s3
-num.append(len(y_flops))
-temp6=[4*B*C**2*W*H*9,2*B*C**2*W*H*9,2*B*C**2*W*H*9,2*B*C**2*W*H*9,2*B*C**2*W*H*9,2*B*C**2*W*H*9]
-temp_w6=[0.5*C**2*K**2,0.25*C**2*K**2,0.25*C**2*K**2,0.25*C**2*K**2,0.25*C**2*K**2,0.25*C**2*K**2]
-temp_i6=[B*C*2*W*2*H,B*C*0.5*2*W*2*H,B*C*0.5*2*W*2*H,B*C*0.5*2*W*2*H,B*C*0.5*2*W*2*H,B*C*0.5*2*W*2*H]
-y_flops.extend(temp6)
-y_flops.append(2*B*320*640*32*32*9)#SHORTCUTs
-y_flops.append(8*B*C**2*W*H*9)#up
+# num1=[]
+# num2=[]
+# # quant convin mid
+# num1.append(len(y_flops))
+# num1.append(len(y_flops)+1)
+# num1.append(len(y_flops)+2)
+# temp4=[2*B*E**2*K**2*W*H,2*B*E*C*K**2*W*H,2*B*C**2*W*H*9,2*B*C**2*W*H*9,6*B*C**2*W*H,2*B*H**2*W**2*C,B*H**2*W**2*C,2*B*C**2*W*H,2*B*C**2*W*H*9,2*B*C**2*W*H*9]
+# temp_w4=[E**2*K**2,E*C*K**2,C**2*K**2,C**2*K**2,3*C**2,B*C*H*W,B*H**2*W**2,C**2,C**2*K**2,C**2*K**2]
+# temp_i4=[B*E*W*H,B*E*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H]
+# temp_m4=[x + y for x, y in zip(temp_w4, temp_i4)]
+# y_flops.extend(temp4)
+# y_mem.extend(temp_m4)
+# print(len(y_flops),len(y_mem))
+# #6K^2C^2+12C^2+12BCHW
+# # up s4
+# num.append(len(y_flops))
+# temp5=[2*B*C**2*W*H*9,2*B*C**2*W*H*9,6*B*C**2*W*H,2*B*H**2*W**2*C,B*H**2*W**2*C,2*B*C**2*W*H]
+# temp_w5=[C**2*K**2,C**2*K**2,3*C**2,B*C*H*W,B*H**2*W**2,C**2]
+# temp_i5=[B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H,B*C*W*H]
+# temp_m5=[x + y for x, y in zip(temp_w5, temp_i5)]
+# for j in range(3):
+#     y_flops.extend(temp5)
+#     y_mem.extend(temp_m5)
+# y_flops.append(8*B*C**2*W*H*9)
+# y_mem.append(C**2*K**2+B*C*W*H)
+# print(len(y_flops),len(y_mem))
+# #up s3
+# num.append(len(y_flops))
+# temp6=[4*B*C**2*W*H*9,2*B*C**2*W*H*9,2*B*C**2*W*H*9,2*B*C**2*W*H*9,2*B*C**2*W*H*9,2*B*C**2*W*H*9]
+# temp_w6=[0.5*C**2*K**2,0.25*C**2*K**2,0.25*C**2*K**2,0.25*C**2*K**2,0.25*C**2*K**2,0.25*C**2*K**2]
+# temp_i6=[B*C*2*W*2*H,B*C*0.5*2*W*2*H,B*C*0.5*2*W*2*H,B*C*0.5*2*W*2*H,B*C*0.5*2*W*2*H,B*C*0.5*2*W*2*H]
+# y_flops.extend(temp6)
+# y_flops.append(2*B*320*640*32*32*9)#SHORTCUTs
+# y_flops.append(8*B*C**2*W*H*9)#up
 
-temp_m6=[x + y for x, y in zip(temp_w6, temp_i6)]
-y_mem.extend(temp_m6)
-y_mem.append(C*0.5*C*K*K+B*C*2*W*2*H)
-y_mem.append(0.5*C*0.5*C*K*K+B*0.5*C*2*W*2*H)
-print(len(y_flops),len(y_mem))
-#up s2
-num.append(len(y_flops))
-for j in range(6):
-    y_flops.append(8*B*C**2*W*H*9)
-    y_mem.append(0.5*C*0.5*C*K*K+B*0.5*C*4*W*4*H)
-y_flops.append(32*B*C**2*W*H*9)#up
-y_mem.append(0.5*C*0.5*C*K*K+B*0.5*C*4*W*4*H)
-print(len(y_flops),len(y_mem))
-#up s1
-num.append(len(y_flops))
-temp7=[16*B*C**2*W*H*9,8*B*C**2*W*H*9,8*B*C**2*W*H*9,8*B*C**2*W*H*9,8*B*C**2*W*H*9,8*B*C**2*W*H*9]
-temp_w7=[0.5*C*0.25*C*K*K,0.25*C*0.25*C*K*K,0.25*C*0.25*C*K*K,0.25*C*0.25*C*K*K,0.25*C*0.25*C*K*K,0.25*C*0.25*C*K*K]
-temp_i7=[B*0.5*C*8*W*8*H,B*0.25*C*8*W*8*H,B*0.25*C*8*W*8*H,B*0.25*C*8*W*8*H,B*0.25*C*8*W*8*H,B*0.25*C*8*W*8*H]
-temp_m7=[x + y for x, y in zip(temp_w7, temp_i7)]
-y_mem.extend(temp_m7)
-y_mem.append(C*0.5*C*0.25*K*K+B*0.5*C*8*W*8*H)
-y_mem.append(0.25*C*0.25*C*K*K+B*0.25*C*8*W*8*H)
-y_flops.extend(temp7)
-y_flops.append(2*B*160*320*128*128*9)#shortcut
-y_flops.append(32*B*C**2*W*H*9)#up
-print(len(y_flops),len(y_mem))
-#up s0
-num.append(len(y_flops))
-for j in range(6):
-    print(32*B*C**2*W*H*9)
-    y_flops.append(32*B*C**2*W*H*9)
-    y_mem.append(0.25*C*0.25*C*K*K+B*0.25*C*16*W*16*H)
-# convout
-y_flops.append(2*B*160*3*9*256*256)
-y_mem.append(0.25*C*3*K*K+B*0.25*C*16*W*16*H)
-print("hhh")
-y_mem=[i * 2  for i in y_mem]
-#y_flops=[i * 1e-9 for i in y_flops]
-cumulative_list=[x/y for x,y in zip(y_flops,y_mem)]
-y_flops = [sum(y_flops[:i+1]) for i in range(len(y_flops))]
+# temp_m6=[x + y for x, y in zip(temp_w6, temp_i6)]
+# y_mem.extend(temp_m6)
+# y_mem.append(C*0.5*C*K*K+B*C*2*W*2*H)
+# y_mem.append(0.5*C*0.5*C*K*K+B*0.5*C*2*W*2*H)
+# print(len(y_flops),len(y_mem))
+# #up s2
+# num.append(len(y_flops))
+# for j in range(6):
+#     y_flops.append(8*B*C**2*W*H*9)
+#     y_mem.append(0.5*C*0.5*C*K*K+B*0.5*C*4*W*4*H)
+# y_flops.append(32*B*C**2*W*H*9)#up
+# y_mem.append(0.5*C*0.5*C*K*K+B*0.5*C*4*W*4*H)
+# print(len(y_flops),len(y_mem))
+# #up s1
+# num.append(len(y_flops))
+# temp7=[16*B*C**2*W*H*9,8*B*C**2*W*H*9,8*B*C**2*W*H*9,8*B*C**2*W*H*9,8*B*C**2*W*H*9,8*B*C**2*W*H*9]
+# temp_w7=[0.5*C*0.25*C*K*K,0.25*C*0.25*C*K*K,0.25*C*0.25*C*K*K,0.25*C*0.25*C*K*K,0.25*C*0.25*C*K*K,0.25*C*0.25*C*K*K]
+# temp_i7=[B*0.5*C*8*W*8*H,B*0.25*C*8*W*8*H,B*0.25*C*8*W*8*H,B*0.25*C*8*W*8*H,B*0.25*C*8*W*8*H,B*0.25*C*8*W*8*H]
+# temp_m7=[x + y for x, y in zip(temp_w7, temp_i7)]
+# y_mem.extend(temp_m7)
+# y_mem.append(C*0.5*C*0.25*K*K+B*0.5*C*8*W*8*H)
+# y_mem.append(0.25*C*0.25*C*K*K+B*0.25*C*8*W*8*H)
+# y_flops.extend(temp7)
+# y_flops.append(2*B*160*320*128*128*9)#shortcut
+# y_flops.append(32*B*C**2*W*H*9)#up
+# print(len(y_flops),len(y_mem))
+# #up s0
+# num.append(len(y_flops))
+# for j in range(6):
+#     print(32*B*C**2*W*H*9)
+#     y_flops.append(32*B*C**2*W*H*9)
+#     y_mem.append(0.25*C*0.25*C*K*K+B*0.25*C*16*W*16*H)
+# # convout
+# y_flops.append(2*B*160*3*9*256*256)
+# y_mem.append(0.25*C*3*K*K+B*0.25*C*16*W*16*H)
+# print("hhh")
+y_mem=[i   for i in y_mem]
+# #y_flops=[i * 1e-9 for i in y_flops]
+# cumulative_list=[x/y for x,y in zip(y_flops,y_mem)]
+# y_flops = [sum(y_flops[:i+1]) for i in range(len(y_flops))]
 y_mem=[sum(y_mem[:i+1]) for i in range(len(y_mem))]
-print("flops")
-print(max(y_flops)*1e-9)
-print("attn_flops")
-print(attn_flops*1e-9)
-print(attn_flops/max(y_flops))
+# print("flops")
+# print(max(y_flops)*1e-9)
+# print("attn_flops")
+# print(attn_flops*1e-9)
+# print(attn_flops/max(y_flops))
+# print(("memory"))
+
 #print(y_flops.index(max(y_flops)))
 #cumulative_list = [sum(y_mem[:i+1]) for i in range(len(y_mem))]
-#print(max(y_mem)/1024/1024/1024)
+print(max(y_mem)/1024/1024/1024)
 # print(np.array(cumulative_list[30:40], dtype=float))
 # print(np.array(y_flops[30:40], dtype=float))
 # print(np.array(y_mem[30:40], dtype=float))

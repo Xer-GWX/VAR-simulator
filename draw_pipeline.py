@@ -5,7 +5,7 @@ from hardware import Bank,Buffer,MFU,NoC_Router,Hardware,Tile
 # 所有time的情况
 def draw(hardware:Hardware,fusion_group_id,tile_id):
     # 提取数据
-    tile = hardware.Hardware[fusion_group_id][tile_id] 
+    tile = hardware.Tile_groups[fusion_group_id][tile_id] 
     operations = {
         'HBM Load': list(zip(hardware.HBM.start_time_list, 
                             [end - start for start, end in zip(hardware.HBM.start_time_list, 
@@ -16,6 +16,9 @@ def draw(hardware:Hardware,fusion_group_id,tile_id):
         'Bank Param 2': list(zip(tile.Buffer.Param_bank[1][0].start_time_list, 
                                     [end - start for start, end in zip(tile.Buffer.Param_bank[1][0].start_time_list, 
                                                                         tile.Buffer.Param_bank[1][0].end_time_list)])),
+        'NoC Communication': list(zip(hardware.NoC_router.start_time_list, 
+                            [end - start for start, end in zip(hardware.NoC_router.start_time_list, 
+                                                            hardware.NoC_router.end_time_list)])),
         'Bank FI 1': list(zip(tile.Buffer.FI_bank[0][0].start_time_list, 
                                     [end - start for start, end in zip(tile.Buffer.FI_bank[0][0].start_time_list, 
                                                                     tile.Buffer.FI_bank[0][0].end_time_list)])),
@@ -30,6 +33,7 @@ def draw(hardware:Hardware,fusion_group_id,tile_id):
                                                                     tile.Buffer.FO_bank[0][0].end_time_list)])),
     }
     
+    
     operations = dict(reversed(list(operations.items())))
     # 为绘图分配不同的颜色
     colors = {
@@ -40,6 +44,7 @@ def draw(hardware:Hardware,fusion_group_id,tile_id):
         'Bank Param 2': 'red',
         'Compute': 'purple',
         'HBM Load': 'yellow',
+        'NoC Communication': 'pink'
     }
 
     # 分配每个操作类型在 Y 轴的位置
@@ -55,7 +60,13 @@ def draw(hardware:Hardware,fusion_group_id,tile_id):
 
     #ax.set_ylim(-1, len(y_labels))
     ax.set_ylim(-0.5, len(y_labels) - 0.5)  # 缩小y轴范围，去掉多余的空白
-    ax.set_xlim(0, max([end for sublist in operations.values() for (start, duration) in sublist for end in [start + duration]]))
+    min_start_time = min([start for sublist in operations.values() for (start, duration) in sublist])
+    max_end_time = max([end for sublist in operations.values() for (start, duration) in sublist for end in [start + duration]])
+
+    # 动态设置 x 轴范围
+    ax.set_xlim(min_start_time, max_end_time)
+    ax.autoscale(enable=False)
+    #ax.set_xlim(0, max([end for sublist in operations.values() for (start, duration) in sublist for end in [start + duration]]))
     ax.set_xlabel('Time')
     ax.set_yticks(y_pos)
     ax.set_yticklabels(y_labels)
@@ -72,28 +83,58 @@ def draw_sample(hardware:Hardware,fusion_group_id,tile_id):
     # 提取数据
     tile = hardware.Tile_groups[fusion_group_id][tile_id] 
     
+    # operations = {
+        
+    #     'HBM Load': list(zip(hardware.HBM.start_time_list[:6], 
+    #                         [end - start for start, end in zip(hardware.HBM.start_time_list[:6], 
+    #                                                         hardware.HBM.end_time_list[:6])])),
+    #     'Bank Param 1': list(zip(tile.Buffer.Param_bank[0][0].start_time_list[:6], 
+    #                                 [end - start for start, end in zip(tile.Buffer.Param_bank[0][0].start_time_list[:6], 
+    #                                                                     tile.Buffer.Param_bank[0][0].end_time_list[:6])])),
+    #     'Bank Param 2': list(zip(tile.Buffer.Param_bank[1][0].start_time_list[:6], 
+    #                                 [end - start for start, end in zip(tile.Buffer.Param_bank[1][0].start_time_list[:6], 
+    #                                                                    tile.Buffer.Param_bank[1][0].end_time_list[:6])])),
+    #     'NoC Communication': list(zip([hardware.NoC_router.start_time_list[0]], 
+    #                         [end - start for start, end in zip([hardware.NoC_router.start_time_list[0]], 
+    #                                                         [hardware.NoC_router.end_time_list[0]])])),
+    #     'Bank FI 1': list(zip(tile.Buffer.FI_bank[0][0].start_time_list[:3], 
+    #                                 [end - start for start, end in zip(tile.Buffer.FI_bank[0][0].start_time_list[:3], 
+    #                                                                 tile.Buffer.FI_bank[0][0].end_time_list[:3])])),
+    #     'Bank FI 2': list(zip(tile.Buffer.FI_bank[1][0].start_time_list[:3], 
+    #                                 [end - start for start, end in zip(tile.Buffer.FI_bank[1][0].start_time_list[:3], 
+    #                                                                 tile.Buffer.FI_bank[1][0].end_time_list[:3])])),
+    #     'Compute': list(zip(tile.MFU.start_time_list[:12], 
+    #                         [end - start for start, end in zip(tile.MFU.start_time_list[:12], 
+    #                                                         tile.MFU.end_time_list[:12])])),
+    #     'Bank FO': list(zip(tile.Buffer.FO_bank[0][0].start_time_list[:12], 
+    #                             [end - start for start, end in zip(tile.Buffer.FO_bank[0][0].start_time_list[:12], 
+    #                                                                 tile.Buffer.FO_bank[0][0].end_time_list[:12])])),
+    # }
     operations = {
-        'HBM Load': list(zip(hardware.HBM.start_time_list[:6], 
-                            [end - start for start, end in zip(hardware.HBM.start_time_list[:6], 
-                                                            hardware.HBM.end_time_list[:6])])),
-        'Bank Param 1': list(zip(tile.Buffer.Param_bank[0][0].start_time_list[:6], 
-                                    [end - start for start, end in zip(tile.Buffer.Param_bank[0][0].start_time_list[:6], 
-                                                                        tile.Buffer.Param_bank[0][0].end_time_list[:6])])),
-        'Bank Param 2': list(zip(tile.Buffer.Param_bank[1][0].start_time_list[:6], 
-                                    [end - start for start, end in zip(tile.Buffer.Param_bank[1][0].start_time_list[:6], 
-                                                                        tile.Buffer.Param_bank[1][0].end_time_list[:6])])),
-        'Bank FI 1': list(zip(tile.Buffer.FI_bank[0][0].start_time_list[:3], 
-                                    [end - start for start, end in zip(tile.Buffer.FI_bank[0][0].start_time_list[:3], 
-                                                                    tile.Buffer.FI_bank[0][0].end_time_list[:3])])),
-        'Bank FI 2': list(zip(tile.Buffer.FI_bank[1][0].start_time_list[:3], 
-                                    [end - start for start, end in zip(tile.Buffer.FI_bank[1][0].start_time_list[:3], 
-                                                                    tile.Buffer.FI_bank[1][0].end_time_list[:3])])),
-        'Compute': list(zip(tile.MFU.start_time_list[:12], 
-                            [end - start for start, end in zip(tile.MFU.start_time_list[:12], 
-                                                            tile.MFU.end_time_list[:12])])),
-        'Bank FO': list(zip(tile.Buffer.FO_bank[0][0].start_time_list[:12], 
-                                [end - start for start, end in zip(tile.Buffer.FO_bank[0][0].start_time_list[:12], 
-                                                                    tile.Buffer.FO_bank[0][0].end_time_list[:12])])),
+        # 'HBM Load': list(zip(hardware.HBM.start_time_list[-12:], 
+        #                     [end - start for start, end in zip(hardware.HBM.start_time_list[-12:], 
+        #                                                     hardware.HBM.end_time_list[-12:])])),
+        'Bank Param 1': list(zip(tile.Buffer.Param_bank[0][0].start_time_list[-12:], 
+                                    [end - start for start, end in zip(tile.Buffer.Param_bank[0][0].start_time_list[-12:], 
+                                                                        tile.Buffer.Param_bank[0][0].end_time_list[-12:])])),
+        'Bank Param 2': list(zip(tile.Buffer.Param_bank[1][0].start_time_list[-12:], 
+                                    [end - start for start, end in zip(tile.Buffer.Param_bank[1][0].start_time_list[-12:], 
+                                                                        tile.Buffer.Param_bank[1][0].end_time_list[-12:])])),
+        'NoC Communication': list(zip([hardware.NoC_router.start_time_list[0]], 
+                            [end - start for start, end in zip([hardware.NoC_router.start_time_list[0]], 
+                                                            [hardware.NoC_router.end_time_list[0]])])),
+        'Bank FI 1': list(zip(tile.Buffer.FI_bank[0][0].start_time_list[-12:], 
+                                    [end - start for start, end in zip(tile.Buffer.FI_bank[0][0].start_time_list[-12:], 
+                                                                    tile.Buffer.FI_bank[0][0].end_time_list[-12:])])),
+        'Bank FI 2': list(zip(tile.Buffer.FI_bank[1][0].start_time_list[-12:], 
+                                    [end - start for start, end in zip(tile.Buffer.FI_bank[1][0].start_time_list[-12:], 
+                                                                    tile.Buffer.FI_bank[1][0].end_time_list[-12:])])),
+        'Compute': list(zip(tile.MFU.start_time_list[-12:], 
+                            [end - start for start, end in zip(tile.MFU.start_time_list[-12:], 
+                                                            tile.MFU.end_time_list[-12:])])),
+        'Bank FO': list(zip(tile.Buffer.FO_bank[0][0].start_time_list[-12:], 
+                                [end - start for start, end in zip(tile.Buffer.FO_bank[0][0].start_time_list[-12:], 
+                                                                    tile.Buffer.FO_bank[0][0].end_time_list[-12:])])),
     }
     operations = dict(reversed(list(operations.items())))
     # 为绘图分配不同的颜色
@@ -104,7 +145,8 @@ def draw_sample(hardware:Hardware,fusion_group_id,tile_id):
         'Bank Param 1': 'orange',
         'Bank Param 2': 'red',
         'Compute': 'purple',
-        'HBM Load': 'yellow',
+        # 'HBM Load': 'yellow',
+        'NoC Communication': 'pink'
     }
 
     # 分配每个操作类型在 Y 轴的位置
@@ -120,7 +162,14 @@ def draw_sample(hardware:Hardware,fusion_group_id,tile_id):
 
     #ax.set_ylim(-1, len(y_labels))
     ax.set_ylim(-0.5, len(y_labels) - 0.5)  # 缩小y轴范围，去掉多余的空白
-    ax.set_xlim(0, max([end for sublist in operations.values() for (start, duration) in sublist for end in [start + duration]]))
+    # 找到最早的 start_time 和最晚的 end_time
+    min_start_time = min([start for sublist in operations.values() for (start, duration) in sublist])
+    max_end_time = max([end for sublist in operations.values() for (start, duration) in sublist for end in [start + duration]])
+
+    # 动态设置 x 轴范围
+    ax.set_xlim(min_start_time, max_end_time)
+    ax.autoscale(enable=False)
+    #ax.set_xlim(0, max([end for sublist in operations.values() for (start, duration) in sublist for end in [start + duration]]))
     ax.set_xlabel('Time')
     ax.set_yticks(y_pos)
     ax.set_yticklabels(y_labels)

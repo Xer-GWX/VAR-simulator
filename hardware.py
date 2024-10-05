@@ -108,6 +108,12 @@ class Bank():
             self.last_access_end_time = start_time + duration_time
             self.start_time_list.append(start_time)
             self.end_time_list.append(self.last_access_end_time)
+        elif self.type == 'FI': #通信过来写入/从dram读取写入进来
+            start_time = max(self.last_access_end_time,end_time)
+            duration_time = dtensor.shape[0] * dtensor.shape[1] * 10 # TODO:把这个东西写成dtensor.ammount
+            self.last_access_end_time = start_time + duration_time
+            self.start_time_list.append(start_time)
+            self.end_time_list.append(self.last_access_end_time)
         return self.last_access_end_time
     
 
@@ -178,7 +184,38 @@ class Buffer():
 
 class NoC_Router():
     def __init__(self) -> None:
-        pass
+        self.last_access_end_time = 0
+        self.NoC_bandwidth = 32 * 1024 #MB PER Second
+        self.start_time_list = []
+        self.end_time_list = []
+    def calculate_noc_distance(self,src_tile:Tile, dst_tile:Tile,hardware:'Hardware'):
+        x1, y1 = hardware.NoC_router.map_tile_to_grid(src_tile,hardware.Tile_total)
+        x2, y2 = hardware.NoC_router.map_tile_to_grid(dst_tile,hardware.Tile_total)
+        return self.manhattan_distance(x1,y1,x2,y2)
+
+    def map_tile_to_grid(self,tile:Tile,tile_total:int):
+        # 1个 tile_id --> grid
+        x = tile.tile_id / tile_total 
+        y = tile.tile_id % tile_total
+        return [x,y]
+        
+    def manhattan_distance(self, x1, y1, x2, y2):
+        return abs(x1 - x2) + abs(y1 - y2)
+
+    def transfer_data(self, ready_time:int,dstensor0:Data_Split_Tensor,src_tile:Tile, dst_tile:Tile,hardware:'Hardware'):
+        """
+        从 source_tile 通信到 dest_tile 并返回数据传输完成后的时间 ready_time是dstensor0读取后的时间
+        """
+        noc_distance = self.calculate_noc_distance(src_tile, dst_tile, hardware)
+        transfer_time = 100000 * noc_distance * dstensor0.amount / self.NoC_bandwidth # TODO: 需要check
+        # 开始时间应该是：dstensor0 准备好的时间 TODO：所有dstensor都应该存一个访问时间？还是什么
+        start_time = max(ready_time,self.last_access_end_time)
+        self.last_access_end_time = start_time + transfer_time
+        #print(f"Data transfer from Tile {source_tile.tile_id} to Tile {dest_tile.tile_id} takes {transfer_time} cycles")
+        # 更新 NoC 传输时间
+        self.start_time_list.append(start_time)
+        self.end_time_list.append(self.last_access_end_time)
+        return self.last_access_end_time
 
 class MFU():
     def __init__(self,compute_capacity:int) -> None:
@@ -188,7 +225,8 @@ class MFU():
         self.start_time_list = []
         self.end_time_list = []
 
-    def process(self,dstensor0: Data_Split_Tensor, dstensor1: Data_Split_Tensor,result_tensor: Data_Split_Tensor,tile_execute:Tile,hbm:HBM):
+    def process(self,dstensor0: Data_Split_Tensor, dstensor1: Data_Split_Tensor,result_tensor: Data_Split_Tensor,tile_execute:Tile, hardware:'Hardware'):
+        hbm = hardware.HBM
         buffer = tile_execute.Buffer #应该传进来一个tile
         mfu = tile_execute.MFU
         # 每次启用tile的时候需要做的，似乎这里也ok，因为没有重新例化bank，只不过给bank分类了
@@ -198,6 +236,7 @@ class MFU():
         
         FI_bank = buffer.get_FI_bank_unit(); Param_bank = buffer.get_param_bank_unit(); FO_bank = buffer.get_FO_bank_unit()
         # 这里每次get的bank是一样的，但是我不希望它们重新例化，我希望都是
+        # TODO: 每个bank存的多少需要check！！！
         for bank in FI_bank[buffer.FI_access_flag % 2]:
             # 应该是另一组bank正在计算的结果
             if len(mfu.end_time_list) == 0 or len(mfu.end_time_list) == 1: FI_ready_time = bank.read_data(0,dstensor0)
@@ -217,6 +256,7 @@ class MFU():
         if len(mfu.end_time_list) == 0 or len(mfu.end_time_list) == 1: # input的情况
             for bank in FO_bank[0]:
                 FO_write_ready_time = bank.write_data(FO_compute_ready_time,result_tensor)
+        # 需要加上滞留的FO
         else:    
             for bank in FO_bank[0]:
                 FO_read_ready_time = bank.read_data(bank.last_access_end_time,result_tensor) # 这里应该是存储的那部分，介于shape一样就直接用的result_tensor
@@ -225,7 +265,33 @@ class MFU():
             for bank in FO_bank[0]:
                 FO_write_ready_time = bank.write_data(FO_add_ready_time,result_tensor)
     
-    
+    def merge(self,dstensor0: Data_Split_Tensor,src_tile:Tile,dst_tile:Tile,hardware:'Hardware'):
+        # 从src_tile读取data
+        src_FO_bank = src_tile.Buffer.get_FO_bank_unit() # TODO: 查一下这里有没有bug
+        dst_FI_bank = dst_tile.Buffer.get_FI_bank_unit(); dst_FO_bank = dst_tile.Buffer.get_FO_bank_unit()
+        for bank in src_FO_bank[0]:
+            src_FO_read_ready_time = bank.read_data(bank.last_access_end_time,dstensor0)
+        for bank in dst_FO_bank[0]:
+            dst_FO_ready_time = bank.last_access_end_time
+        # 从src通信到dst
+        ready_time = max(src_FO_read_ready_time,dst_FO_ready_time)
+        com_ready_time = hardware.NoC_router.transfer_data(ready_time,dstensor0,src_tile,dst_tile,hardware)
+        
+        # 把data写入dst 读取 并进行add计算 然后 写入
+        for bank in dst_FI_bank[dst_tile.Buffer.FI_access_flag % 2]:
+            FI_write_ready_time = bank.write_data(com_ready_time,dstensor0)
+        
+        for bank in dst_FI_bank[dst_tile.Buffer.FI_access_flag % 2]:
+            FI_read_ready_time = bank.write_data(FI_write_ready_time,dstensor0)
+        
+        dst_tile.Buffer.FI_access_flag += 1 # 用于pingpong
+
+        FO_add_ready_time = dst_tile.MFU.compute(dstensor0,dstensor0,FI_read_ready_time,dst_FO_ready_time,'mat_mat_add')
+        
+        for bank in dst_FO_bank[0]:
+            FO_write_ready_time = bank.write_data(FO_add_ready_time,dstensor0)
+        
+
     def compute(self,dstensor0: Data_Split_Tensor,dstensor1: Data_Split_Tensor,FI_ready_time,Param_ready_time,op):
         if op == 'mat_mat_mul':
             start_time = max(self.last_access_end_time,FI_ready_time,Param_ready_time)
@@ -247,6 +313,7 @@ class MFU():
 class Hardware:
     def __init__(self,Tile_total,compute_capacity,Bank_num_max,bank_capacity):
         self.HBM = HBM()
+        self.NoC_router = NoC_Router()
         self.Tile_total = Tile_total
         # tile_list是一组tile
         self.Tile_list = [Tile(i,compute_capacity,Bank_num_max,bank_capacity) for i in range(Tile_total)]
@@ -255,10 +322,13 @@ class Hardware:
     def update_map_result(self,fusion_group_num):
         self.Tile_groups = [self.Tile_list for _ in range(fusion_group_num)]
     
-    def process(self,dstensor0: Data_Split_Tensor, dstensor1: Data_Split_Tensor,result_tensor: Data_Split_Tensor,tile_execute:Tile,hbm:HBM,op:str):
+    def process(self,dstensor0: Data_Split_Tensor, dstensor1: Data_Split_Tensor,result_tensor: Data_Split_Tensor,tile_execute:Tile,op:str):
         if op == "MM":
-            tile_execute.MFU.process(dstensor0,dstensor1,result_tensor,tile_execute,hbm)
-
+            tile_execute.MFU.process(dstensor0,dstensor1,result_tensor,tile_execute,self)
+    def merge(self,dstensor0: Data_Split_Tensor,src_tile:Tile,dst_tile:Tile,op:str):
+        if op == 'MM':
+            dst_tile.MFU.merge(dstensor0,src_tile,dst_tile,self)
+        return dst_tile
 
 def load_hardware_json(file_path):
     config_data = tools.load_json(file_path)
