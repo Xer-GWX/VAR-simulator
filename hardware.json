@@ -1,0 +1,7 @@
+{
+    "Tile_total": 144,
+    "Compute_capacity":256,
+    "Bank_num_max": 32,
+    "Bank_capacity": 32 //width32bit depth 
+
+}

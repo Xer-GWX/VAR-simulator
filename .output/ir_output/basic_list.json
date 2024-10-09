@@ -1,0 +1,197 @@
+[
+    {
+      "name": "qkv",
+      "type": "MM",
+      "input": [
+        {
+          "name": "0",
+          "shape": [
+            25,
+            1024
+          ],
+          "dtype": "float16"
+        }
+      ],
+      "output": [
+        {
+            "name": "0",
+            "shape": [
+              25,
+              3072
+            ],
+            "dtype": "float16"
+          }
+      ],
+      "param": {
+        "weight": {
+          "name": "0",
+          "shape": [
+            1024,
+            3072
+          ],
+          "dtype": "float16"
+        }
+      }
+    },
+    {
+        "name": "mat1",
+        "type": "attention_MM",
+        "input": [
+          {
+            "name": "1",
+            "shape": [
+              25,
+              1024
+            ],
+            "dtype": "float16"
+          },
+          {
+            "name": "1",
+            "shape": [
+              1024,
+              55
+            ],
+            "dtype": "float16"
+          }
+        ],
+        "output": [
+          {
+              "name": "0",
+              "shape": [
+                25,
+                55
+              ],
+              "dtype": "float16"
+            }
+        ],
+        "param": {}
+    },
+    {
+      "name": "silu",
+      "type": "silu",
+      "input": [
+        {
+          "name": "1",
+          "shape": [
+            55,
+            1024
+          ],
+          "dtype": "float16"
+        }
+      ],
+      "output": [
+        {
+            "name": "0",
+            "shape": [
+              55,
+              1024
+            ],
+            "dtype": "float16"
+          }
+      ],
+      "param": {}
+  },
+    {
+      "name": "p1",
+      "type": "MM",
+      "input": [
+        {
+          "name": "0",
+          "shape": [
+            25,
+            1024
+          ],
+          "dtype": "float16"
+        }
+      ],
+      "output": [
+        {
+            "name": "0",
+            "shape": [
+              25,
+              1024
+            ],
+            "dtype": "float16"
+          }
+      ],
+      "param": {
+        "weight": {
+          "name": "0",
+          "shape": [
+            1024,
+            1024
+          ],
+          "dtype": "float16"
+        }
+      }
+    },
+    {
+      "name": "f1",
+      "type": "MM",
+      "input": [
+        {
+          "name": "0",
+          "shape": [
+            25,
+            1024
+          ],
+          "dtype": "float16"
+        }
+      ],
+      "output": [
+        {
+            "name": "0",
+            "shape": [
+              25,
+              4096
+            ],
+            "dtype": "float16"
+          }
+      ],
+      "param": {
+        "weight": {
+          "name": "0",
+          "shape": [
+            1024,
+            4096
+          ],
+          "dtype": "float16"
+        }
+      }
+    },
+    {
+      "name": "f2",
+      "type": "MM",
+      "input": [
+        {
+          "name": "0",
+          "shape": [
+            25,
+            4096
+          ],
+          "dtype": "float16"
+        }
+      ],
+      "output": [
+        {
+            "name": "0",
+            "shape": [
+              25,
+              1024
+            ],
+            "dtype": "float16"
+          }
+      ],
+      "param": {
+        "weight": {
+          "name": "0",
+          "shape": [
+            4096,
+            1024
+          ],
+          "dtype": "float16"
+        }
+      }
+    }
+
+]
