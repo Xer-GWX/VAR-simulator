@@ -1,6 +1,6 @@
 git add .
 git commit -m "update"
-git push --set-upstream origin master
+git push origin master
 
 update head branch
 
