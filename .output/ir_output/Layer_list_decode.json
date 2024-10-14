@@ -1,0 +1,7645 @@
+[
+  {
+    "name": "post_quant_conv_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "f_hat",
+        "shape": [
+          8,
+          32,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "hidden_quant_conv",
+        "shape": [
+          8,
+          32,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "post_quant_conv_layer.weight",
+        "shape": [
+          32,
+          32,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "conv_in_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "hidden_quant_conv",
+        "shape": [
+          8,
+          32,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "hidden_conv_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "conv_in_layer.weight",
+        "shape": [
+          640,
+          32,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "mid_resblock0_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "mid_resblock0_hidden_conv_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock0_groupnorm0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "mid_resblock0_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "mid_resblock0_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "mid_resblock0_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "mid_resblock0_groupnorm0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock0_silu0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "mid_resblock0_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "mid_resblock0_silu0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock0_conv0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "mid_resblock0_conv0_layer.weight",
+        "shape": [
+          640,
+          640,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "mid_resblock0_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "mid_resblock0_hidden_conv_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock0_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "mid_resblock0_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "mid_resblock0_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "mid_resblock0_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "mid_resblock0_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock0_silu1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "mid_resblock0_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "mid_resblock0_silu1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock0_conv1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "mid_resblock0_conv1_layer.weight",
+        "shape": [
+          640,
+          640,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "mid_resblock0_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "mid_resblock0_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "mid_resblock0_conv1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock0_hidden_add_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "mid_attnblock0_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "mid_attnblock0_hidden_mid_block0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_attnblock0_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "mid_attnblock0_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "mid_attnblock0_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "mid_attnblock0_qkv_linear_layer",
+    "type": "MM",
+    "input": [
+      {
+        "name": "mid_attnblock0_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_attnblock0_qkv",
+        "shape": [
+          8,
+          1920,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "mid_attnblock0_qkv_linear_layer_.weight",
+        "shape": [
+          1920,
+          640,
+          1,
+          1
+        ],
+        "dtype": "float16",
+        "data_type": "linear_weight"
+      },
+      "bias": {
+        "name": "mid_attnblock0_qkv_linear_layer_.bias",
+        "shape": [
+          1,
+          1,
+          1920
+        ],
+        "dtype": "float16",
+        "data_type": "linear_bias"
+      }
+    },
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": true,
+      "relu_flag": false,
+      "mask_mode": null
+    }
+  },
+  {
+    "name": "mid_attnblock0_attention_qkt",
+    "type": "attentionMM",
+    "input": [
+      {
+        "name": "mid_attnblock0_q",
+        "shape": [
+          8,
+          256,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "mid_attnblock0_k_t",
+        "shape": [
+          8,
+          640,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "k_cache",
+        "tag": "k_cache"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_attnblock0_qkt_mm",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": false,
+      "relu_flag": false,
+      "mask_mode": "qkt",
+      "attention_mask_id": 0
+    }
+  },
+  {
+    "name": "mid_attnblock0_softmax",
+    "type": "softmax",
+    "input": [
+      {
+        "name": "mid_attnblock0_qkt_mm",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_attnblock0_qkt_softmax",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "vector",
+    "structure": {}
+  },
+  {
+    "name": "mid_attnblock0_attention_qktv",
+    "type": "attentionMM",
+    "input": [
+      {
+        "name": "mid_attnblock0_qkt_softmax",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "mid_attnblock0_v",
+        "shape": [
+          8,
+          256,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "v_cache_t",
+        "tag": "v_cache"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_attnblock0_qktv_mm",
+        "shape": [
+          8,
+          256,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": false,
+      "relu_flag": false,
+      "mask_mode": "qktv",
+      "attention_mask_id": 0
+    }
+  },
+  {
+    "name": "mid_attnblock0_out_proj_layer",
+    "type": "MM",
+    "input": [
+      {
+        "name": "mid_attnblock0_qktv_softmax",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_attnblock0_proj_out",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "mid_attnblock0_out_proj_layer.weight",
+        "shape": [
+          640,
+          640,
+          1,
+          1
+        ],
+        "dtype": "float16",
+        "data_type": "linear_weight"
+      },
+      "bias": {
+        "name": "mid_attnblock0_out_proj_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "linear_bias"
+      }
+    },
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": true,
+      "relu_flag": false,
+      "mask_mode": null
+    }
+  },
+  {
+    "name": "mid_attnblock0_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "mid_attnblock0_hidden_mid_block0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "mid_attnblock0_proj_out",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_attnblock0_hidden_add_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "mid_resblock1_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "mid_resblock1_hidden_mid_attn",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock1_groupnorm0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "mid_resblock1_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "mid_resblock1_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "mid_resblock1_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "mid_resblock1_groupnorm0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock1_silu0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "mid_resblock1_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "mid_resblock1_silu0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock1_conv0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "mid_resblock1_conv0_layer.weight",
+        "shape": [
+          640,
+          640,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "mid_resblock1_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "mid_resblock1_hidden_mid_attn",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock1_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "mid_resblock1_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "mid_resblock1_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "mid_resblock1_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "mid_resblock1_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock1_silu1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "mid_resblock1_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "mid_resblock1_silu1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock1_conv1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "mid_resblock1_conv1_layer.weight",
+        "shape": [
+          640,
+          640,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "mid_resblock1_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "mid_resblock1_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "mid_resblock1_conv1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "mid_resblock1_hidden_add_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_resblock0_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up4_resblock0_hidden_resblock_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock0_groupnorm0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_resblock0_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up4_resblock0_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up4_resblock0_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up4_resblock0_groupnorm0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock0_silu0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_resblock0_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up4_resblock0_silu0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock0_conv0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_resblock0_conv0_layer.weight",
+        "shape": [
+          640,
+          640,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up4_resblock0_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up4_resblock0_hidden_resblock_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock0_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_resblock0_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up4_resblock0_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up4_resblock0_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up4_resblock0_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock0_silu1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_resblock0_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up4_resblock0_silu1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock0_conv1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_resblock0_conv1_layer.weight",
+        "shape": [
+          640,
+          640,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up4_resblock0_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up4_resblock0_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up4_resblock0_conv1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock0_hidden_add_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_attnblock0_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up4_attnblock0_hidden_attnblock_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock0_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_attnblock0_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up4_attnblock0_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up4_attnblock0_qkv_linear_layer",
+    "type": "MM",
+    "input": [
+      {
+        "name": "up4_attnblock0_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock0_qkv",
+        "shape": [
+          8,
+          1920,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_attnblock0_qkv_linear_layer_.weight",
+        "shape": [
+          1920,
+          640,
+          1,
+          1
+        ],
+        "dtype": "float16",
+        "data_type": "linear_weight"
+      },
+      "bias": {
+        "name": "up4_attnblock0_qkv_linear_layer_.bias",
+        "shape": [
+          1,
+          1,
+          1920
+        ],
+        "dtype": "float16",
+        "data_type": "linear_bias"
+      }
+    },
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": true,
+      "relu_flag": false,
+      "mask_mode": null
+    }
+  },
+  {
+    "name": "up4_attnblock0_attention_qkt",
+    "type": "attentionMM",
+    "input": [
+      {
+        "name": "up4_attnblock0_q",
+        "shape": [
+          8,
+          256,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up4_attnblock0_k_t",
+        "shape": [
+          8,
+          640,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "k_cache",
+        "tag": "k_cache"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock0_qkt_mm",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": false,
+      "relu_flag": false,
+      "mask_mode": "qkt",
+      "attention_mask_id": 0
+    }
+  },
+  {
+    "name": "up4_attnblock0_softmax",
+    "type": "softmax",
+    "input": [
+      {
+        "name": "up4_attnblock0_qkt_mm",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock0_qkt_softmax",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "vector",
+    "structure": {}
+  },
+  {
+    "name": "up4_attnblock0_attention_qktv",
+    "type": "attentionMM",
+    "input": [
+      {
+        "name": "up4_attnblock0_qkt_softmax",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up4_attnblock0_v",
+        "shape": [
+          8,
+          256,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "v_cache_t",
+        "tag": "v_cache"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock0_qktv_mm",
+        "shape": [
+          8,
+          256,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": false,
+      "relu_flag": false,
+      "mask_mode": "qktv",
+      "attention_mask_id": 0
+    }
+  },
+  {
+    "name": "up4_attnblock0_out_proj_layer",
+    "type": "MM",
+    "input": [
+      {
+        "name": "up4_attnblock0_qktv_softmax",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock0_proj_out",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_attnblock0_out_proj_layer.weight",
+        "shape": [
+          640,
+          640,
+          1,
+          1
+        ],
+        "dtype": "float16",
+        "data_type": "linear_weight"
+      },
+      "bias": {
+        "name": "up4_attnblock0_out_proj_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "linear_bias"
+      }
+    },
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": true,
+      "relu_flag": false,
+      "mask_mode": null
+    }
+  },
+  {
+    "name": "up4_attnblock0_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up4_attnblock0_hidden_attnblock_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up4_attnblock0_proj_out",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock0_hidden_add_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_resblock1_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up4_resblock1_hidden_resblock_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock1_groupnorm0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_resblock1_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up4_resblock1_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up4_resblock1_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up4_resblock1_groupnorm0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock1_silu0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_resblock1_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up4_resblock1_silu0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock1_conv0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_resblock1_conv0_layer.weight",
+        "shape": [
+          640,
+          640,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up4_resblock1_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up4_resblock1_hidden_resblock_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock1_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_resblock1_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up4_resblock1_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up4_resblock1_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up4_resblock1_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock1_silu1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_resblock1_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up4_resblock1_silu1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock1_conv1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_resblock1_conv1_layer.weight",
+        "shape": [
+          640,
+          640,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up4_resblock1_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up4_resblock1_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up4_resblock1_conv1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock1_hidden_add_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_attnblock1_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up4_attnblock1_hidden_attnblock_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock1_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_attnblock1_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up4_attnblock1_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up4_attnblock1_qkv_linear_layer",
+    "type": "MM",
+    "input": [
+      {
+        "name": "up4_attnblock1_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock1_qkv",
+        "shape": [
+          8,
+          1920,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_attnblock1_qkv_linear_layer_.weight",
+        "shape": [
+          1920,
+          640,
+          1,
+          1
+        ],
+        "dtype": "float16",
+        "data_type": "linear_weight"
+      },
+      "bias": {
+        "name": "up4_attnblock1_qkv_linear_layer_.bias",
+        "shape": [
+          1,
+          1,
+          1920
+        ],
+        "dtype": "float16",
+        "data_type": "linear_bias"
+      }
+    },
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": true,
+      "relu_flag": false,
+      "mask_mode": null
+    }
+  },
+  {
+    "name": "up4_attnblock1_attention_qkt",
+    "type": "attentionMM",
+    "input": [
+      {
+        "name": "up4_attnblock1_q",
+        "shape": [
+          8,
+          256,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up4_attnblock1_k_t",
+        "shape": [
+          8,
+          640,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "k_cache",
+        "tag": "k_cache"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock1_qkt_mm",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": false,
+      "relu_flag": false,
+      "mask_mode": "qkt",
+      "attention_mask_id": 0
+    }
+  },
+  {
+    "name": "up4_attnblock1_softmax",
+    "type": "softmax",
+    "input": [
+      {
+        "name": "up4_attnblock1_qkt_mm",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock1_qkt_softmax",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "vector",
+    "structure": {}
+  },
+  {
+    "name": "up4_attnblock1_attention_qktv",
+    "type": "attentionMM",
+    "input": [
+      {
+        "name": "up4_attnblock1_qkt_softmax",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up4_attnblock1_v",
+        "shape": [
+          8,
+          256,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "v_cache_t",
+        "tag": "v_cache"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock1_qktv_mm",
+        "shape": [
+          8,
+          256,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": false,
+      "relu_flag": false,
+      "mask_mode": "qktv",
+      "attention_mask_id": 0
+    }
+  },
+  {
+    "name": "up4_attnblock1_out_proj_layer",
+    "type": "MM",
+    "input": [
+      {
+        "name": "up4_attnblock1_qktv_softmax",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock1_proj_out",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_attnblock1_out_proj_layer.weight",
+        "shape": [
+          640,
+          640,
+          1,
+          1
+        ],
+        "dtype": "float16",
+        "data_type": "linear_weight"
+      },
+      "bias": {
+        "name": "up4_attnblock1_out_proj_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "linear_bias"
+      }
+    },
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": true,
+      "relu_flag": false,
+      "mask_mode": null
+    }
+  },
+  {
+    "name": "up4_attnblock1_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up4_attnblock1_hidden_attnblock_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up4_attnblock1_proj_out",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock1_hidden_add_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_resblock2_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up4_resblock2_hidden_resblock_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock2_groupnorm0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_resblock2_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up4_resblock2_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up4_resblock2_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up4_resblock2_groupnorm0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock2_silu0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_resblock2_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up4_resblock2_silu0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock2_conv0",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_resblock2_conv0_layer.weight",
+        "shape": [
+          640,
+          640,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up4_resblock2_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up4_resblock2_hidden_resblock_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock2_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_resblock2_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up4_resblock2_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up4_resblock2_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up4_resblock2_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock2_silu1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_resblock2_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up4_resblock2_silu1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock2_conv1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_resblock2_conv1_layer.weight",
+        "shape": [
+          640,
+          640,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up4_resblock2_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up4_resblock2_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up4_resblock2_conv1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_resblock2_hidden_add_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_attnblock2_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up4_attnblock2_hidden_attnblock_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock2_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_attnblock2_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up4_attnblock2_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up4_attnblock2_qkv_linear_layer",
+    "type": "MM",
+    "input": [
+      {
+        "name": "up4_attnblock2_groupnorm1",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock2_qkv",
+        "shape": [
+          8,
+          1920,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_attnblock2_qkv_linear_layer_.weight",
+        "shape": [
+          1920,
+          640,
+          1,
+          1
+        ],
+        "dtype": "float16",
+        "data_type": "linear_weight"
+      },
+      "bias": {
+        "name": "up4_attnblock2_qkv_linear_layer_.bias",
+        "shape": [
+          1,
+          1,
+          1920
+        ],
+        "dtype": "float16",
+        "data_type": "linear_bias"
+      }
+    },
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": true,
+      "relu_flag": false,
+      "mask_mode": null
+    }
+  },
+  {
+    "name": "up4_attnblock2_attention_qkt",
+    "type": "attentionMM",
+    "input": [
+      {
+        "name": "up4_attnblock2_q",
+        "shape": [
+          8,
+          256,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up4_attnblock2_k_t",
+        "shape": [
+          8,
+          640,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "k_cache",
+        "tag": "k_cache"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock2_qkt_mm",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": false,
+      "relu_flag": false,
+      "mask_mode": "qkt",
+      "attention_mask_id": 0
+    }
+  },
+  {
+    "name": "up4_attnblock2_softmax",
+    "type": "softmax",
+    "input": [
+      {
+        "name": "up4_attnblock2_qkt_mm",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock2_qkt_softmax",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "vector",
+    "structure": {}
+  },
+  {
+    "name": "up4_attnblock2_attention_qktv",
+    "type": "attentionMM",
+    "input": [
+      {
+        "name": "up4_attnblock2_qkt_softmax",
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up4_attnblock2_v",
+        "shape": [
+          8,
+          256,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "v_cache_t",
+        "tag": "v_cache"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock2_qktv_mm",
+        "shape": [
+          8,
+          256,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": false,
+      "relu_flag": false,
+      "mask_mode": "qktv",
+      "attention_mask_id": 0
+    }
+  },
+  {
+    "name": "up4_attnblock2_out_proj_layer",
+    "type": "MM",
+    "input": [
+      {
+        "name": "up4_attnblock2_qktv_softmax",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock2_proj_out",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_attnblock2_out_proj_layer.weight",
+        "shape": [
+          640,
+          640,
+          1,
+          1
+        ],
+        "dtype": "float16",
+        "data_type": "linear_weight"
+      },
+      "bias": {
+        "name": "up4_attnblock2_out_proj_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "linear_bias"
+      }
+    },
+    "granularity": "matrix",
+    "structure": {
+      "bias_flag": true,
+      "relu_flag": false,
+      "mask_mode": null
+    }
+  },
+  {
+    "name": "up4_attnblock2_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up4_attnblock2_hidden_attnblock_in",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up4_attnblock2_proj_out",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_attnblock2_hidden_add_shortcut",
+        "shape": [
+          8,
+          640,
+          16,
+          16
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up4_upsample_conv_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up4_upsample_hidden_upsample_in",
+        "shape": [
+          8,
+          640,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up4_upsample_upsample",
+        "shape": [
+          8,
+          640,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up4_upsample_conv_layer.weight",
+        "shape": [
+          640,
+          640,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up3_resblock0_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up3_resblock0_hidden_resblock_in",
+        "shape": [
+          8,
+          640,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock0_groupnorm0",
+        "shape": [
+          8,
+          640,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock0_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up3_resblock0_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          640
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up3_resblock0_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up3_resblock0_groupnorm0",
+        "shape": [
+          8,
+          640,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock0_silu0",
+        "shape": [
+          8,
+          640,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up3_resblock0_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up3_resblock0_silu0",
+        "shape": [
+          8,
+          640,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock0_conv0",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock0_conv0_layer.weight",
+        "shape": [
+          320,
+          640,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up3_resblock0_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up3_resblock0_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock0_groupnorm1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock0_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up3_resblock0_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up3_resblock0_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up3_resblock0_groupnorm1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock0_silu1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up3_resblock0_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up3_resblock0_silu1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock0_conv1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock0_conv1_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up3_resblock0_conv_shortcut_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up3_resblock0_hidden_resblock_in",
+        "shape": [
+          8,
+          640,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock0_shortcut",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock0_conv_shortcut_layer.weight",
+        "shape": [
+          320,
+          640,
+          1,
+          1
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up3_resblock0_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up3_resblock0_shortcut",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up3_resblock0_conv1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock0_hidden_add_shortcut",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up3_resblock1_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up3_resblock1_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock1_groupnorm0",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock1_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up3_resblock1_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up3_resblock1_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up3_resblock1_groupnorm0",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock1_silu0",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up3_resblock1_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up3_resblock1_silu0",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock1_conv0",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock1_conv0_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up3_resblock1_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up3_resblock1_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock1_groupnorm1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock1_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up3_resblock1_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up3_resblock1_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up3_resblock1_groupnorm1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock1_silu1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up3_resblock1_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up3_resblock1_silu1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock1_conv1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock1_conv1_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up3_resblock1_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up3_resblock1_shortcut",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up3_resblock1_conv1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock1_hidden_add_shortcut",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up3_resblock2_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up3_resblock2_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock2_groupnorm0",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock2_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up3_resblock2_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up3_resblock2_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up3_resblock2_groupnorm0",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock2_silu0",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up3_resblock2_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up3_resblock2_silu0",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock2_conv0",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock2_conv0_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up3_resblock2_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up3_resblock2_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock2_groupnorm1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock2_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up3_resblock2_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up3_resblock2_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up3_resblock2_groupnorm1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock2_silu1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up3_resblock2_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up3_resblock2_silu1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock2_conv1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_resblock2_conv1_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up3_resblock2_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up3_resblock2_shortcut",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up3_resblock2_conv1",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_resblock2_hidden_add_shortcut",
+        "shape": [
+          8,
+          320,
+          32,
+          32
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up3_upsample_conv_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up3_upsample_hidden_upsample_in",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up3_upsample_upsample",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up3_upsample_conv_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up2_resblock0_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up2_resblock0_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock0_groupnorm0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_resblock0_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up2_resblock0_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up2_resblock0_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up2_resblock0_groupnorm0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock0_silu0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up2_resblock0_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up2_resblock0_silu0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock0_conv0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_resblock0_conv0_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up2_resblock0_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up2_resblock0_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock0_groupnorm1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_resblock0_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up2_resblock0_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up2_resblock0_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up2_resblock0_groupnorm1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock0_silu1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up2_resblock0_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up2_resblock0_silu1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock0_conv1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_resblock0_conv1_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up2_resblock0_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up2_resblock0_shortcut",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up2_resblock0_conv1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock0_hidden_add_shortcut",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up2_resblock1_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up2_resblock1_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock1_groupnorm0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_resblock1_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up2_resblock1_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up2_resblock1_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up2_resblock1_groupnorm0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock1_silu0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up2_resblock1_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up2_resblock1_silu0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock1_conv0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_resblock1_conv0_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up2_resblock1_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up2_resblock1_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock1_groupnorm1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_resblock1_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up2_resblock1_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up2_resblock1_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up2_resblock1_groupnorm1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock1_silu1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up2_resblock1_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up2_resblock1_silu1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock1_conv1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_resblock1_conv1_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up2_resblock1_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up2_resblock1_shortcut",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up2_resblock1_conv1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock1_hidden_add_shortcut",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up2_resblock2_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up2_resblock2_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock2_groupnorm0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_resblock2_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up2_resblock2_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up2_resblock2_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up2_resblock2_groupnorm0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock2_silu0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up2_resblock2_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up2_resblock2_silu0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock2_conv0",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_resblock2_conv0_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up2_resblock2_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up2_resblock2_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock2_groupnorm1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_resblock2_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up2_resblock2_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up2_resblock2_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up2_resblock2_groupnorm1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock2_silu1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up2_resblock2_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up2_resblock2_silu1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock2_conv1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_resblock2_conv1_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up2_resblock2_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up2_resblock2_shortcut",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up2_resblock2_conv1",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_resblock2_hidden_add_shortcut",
+        "shape": [
+          8,
+          320,
+          64,
+          64
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up2_upsample_conv_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up2_upsample_hidden_upsample_in",
+        "shape": [
+          8,
+          320,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up2_upsample_upsample",
+        "shape": [
+          8,
+          320,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up2_upsample_conv_layer.weight",
+        "shape": [
+          320,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up1_resblock0_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up1_resblock0_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock0_groupnorm0",
+        "shape": [
+          8,
+          320,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock0_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up1_resblock0_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          320
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up1_resblock0_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up1_resblock0_groupnorm0",
+        "shape": [
+          8,
+          320,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock0_silu0",
+        "shape": [
+          8,
+          320,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up1_resblock0_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up1_resblock0_silu0",
+        "shape": [
+          8,
+          320,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock0_conv0",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock0_conv0_layer.weight",
+        "shape": [
+          160,
+          320,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up1_resblock0_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up1_resblock0_hidden_resblock_in",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock0_groupnorm1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock0_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up1_resblock0_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up1_resblock0_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up1_resblock0_groupnorm1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock0_silu1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up1_resblock0_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up1_resblock0_silu1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock0_conv1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock0_conv1_layer.weight",
+        "shape": [
+          160,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up1_resblock0_conv_shortcut_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up1_resblock0_hidden_resblock_in",
+        "shape": [
+          8,
+          320,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock0_shortcut",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock0_conv_shortcut_layer.weight",
+        "shape": [
+          160,
+          320,
+          1,
+          1
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up1_resblock0_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up1_resblock0_shortcut",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up1_resblock0_conv1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock0_hidden_add_shortcut",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up1_resblock1_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up1_resblock1_hidden_resblock_in",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock1_groupnorm0",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock1_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up1_resblock1_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up1_resblock1_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up1_resblock1_groupnorm0",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock1_silu0",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up1_resblock1_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up1_resblock1_silu0",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock1_conv0",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock1_conv0_layer.weight",
+        "shape": [
+          160,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up1_resblock1_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up1_resblock1_hidden_resblock_in",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock1_groupnorm1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock1_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up1_resblock1_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up1_resblock1_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up1_resblock1_groupnorm1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock1_silu1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up1_resblock1_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up1_resblock1_silu1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock1_conv1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock1_conv1_layer.weight",
+        "shape": [
+          160,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up1_resblock1_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up1_resblock1_shortcut",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up1_resblock1_conv1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock1_hidden_add_shortcut",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up1_resblock2_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up1_resblock2_hidden_resblock_in",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock2_groupnorm0",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock2_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up1_resblock2_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up1_resblock2_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up1_resblock2_groupnorm0",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock2_silu0",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up1_resblock2_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up1_resblock2_silu0",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock2_conv0",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock2_conv0_layer.weight",
+        "shape": [
+          160,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up1_resblock2_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up1_resblock2_hidden_resblock_in",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock2_groupnorm1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock2_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up1_resblock2_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up1_resblock2_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up1_resblock2_groupnorm1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock2_silu1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up1_resblock2_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up1_resblock2_silu1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock2_conv1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_resblock2_conv1_layer.weight",
+        "shape": [
+          160,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up1_resblock2_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up1_resblock2_shortcut",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up1_resblock2_conv1",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_resblock2_hidden_add_shortcut",
+        "shape": [
+          8,
+          160,
+          128,
+          128
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up1_upsample_conv_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up1_upsample_hidden_upsample_in",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up1_upsample_upsample",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up1_upsample_conv_layer.weight",
+        "shape": [
+          160,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up0_resblock0_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up0_resblock0_hidden_resblock_in",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock0_groupnorm0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up0_resblock0_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up0_resblock0_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up0_resblock0_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up0_resblock0_groupnorm0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock0_silu0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up0_resblock0_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up0_resblock0_silu0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock0_conv0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up0_resblock0_conv0_layer.weight",
+        "shape": [
+          160,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up0_resblock0_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up0_resblock0_hidden_resblock_in",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock0_groupnorm1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up0_resblock0_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up0_resblock0_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up0_resblock0_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up0_resblock0_groupnorm1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock0_silu1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up0_resblock0_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up0_resblock0_silu1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock0_conv1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up0_resblock0_conv1_layer.weight",
+        "shape": [
+          160,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up0_resblock0_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up0_resblock0_shortcut",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up0_resblock0_conv1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock0_hidden_add_shortcut",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up0_resblock1_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up0_resblock1_hidden_resblock_in",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock1_groupnorm0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up0_resblock1_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up0_resblock1_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up0_resblock1_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up0_resblock1_groupnorm0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock1_silu0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up0_resblock1_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up0_resblock1_silu0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock1_conv0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up0_resblock1_conv0_layer.weight",
+        "shape": [
+          160,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up0_resblock1_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up0_resblock1_hidden_resblock_in",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock1_groupnorm1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up0_resblock1_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up0_resblock1_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up0_resblock1_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up0_resblock1_groupnorm1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock1_silu1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up0_resblock1_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up0_resblock1_silu1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock1_conv1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up0_resblock1_conv1_layer.weight",
+        "shape": [
+          160,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up0_resblock1_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up0_resblock1_shortcut",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up0_resblock1_conv1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock1_hidden_add_shortcut",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up0_resblock2_groupnorm0_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up0_resblock2_hidden_resblock_in",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock2_groupnorm0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up0_resblock2_groupnorm0_layer.weight",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up0_resblock2_groupnorm0_layer.bias",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up0_resblock2_silu0_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up0_resblock2_groupnorm0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock2_silu0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up0_resblock2_conv0_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up0_resblock2_silu0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock2_conv0",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up0_resblock2_conv0_layer.weight",
+        "shape": [
+          160,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up0_resblock2_groupnorm1_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up0_resblock2_hidden_resblock_in",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock2_groupnorm1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up0_resblock2_groupnorm1_layer.weight",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "up0_resblock2_groupnorm1_layer.bias",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "up0_resblock2_silu1_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "up0_resblock2_groupnorm1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock2_silu1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "up0_resblock2_conv1_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "up0_resblock2_silu1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock2_conv1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "up0_resblock2_conv1_layer.weight",
+        "shape": [
+          160,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  },
+  {
+    "name": "up0_resblock2_hidden_add_shortcut_layer",
+    "type": "eltwiseadd",
+    "input": [
+      {
+        "name": "up0_resblock2_shortcut",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      },
+      {
+        "name": "up0_resblock2_conv1",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "up0_resblock2_hidden_add_shortcut",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "groupnorm_out_layer",
+    "type": "groupnorm",
+    "input": [
+      {
+        "name": "up0_resblock2_hidden_add_shortcut",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "groupnorm_out",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "groupnorm_out_layer.weight",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_weight"
+      },
+      "bias": {
+        "name": "groupnorm_out_layer.bias",
+        "shape": [
+          1,
+          1,
+          160
+        ],
+        "dtype": "float16",
+        "data_type": "groupnorm_bias"
+      }
+    },
+    "granularity": "vector",
+    "structure": {
+      "bias_flag": true
+    }
+  },
+  {
+    "name": "silu_out_layer",
+    "type": "silu",
+    "input": [
+      {
+        "name": "groupnorm_out",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "output": [
+      {
+        "name": "silu_out",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "sequence"
+      }
+    ],
+    "param": {},
+    "granularity": "element",
+    "structure": {}
+  },
+  {
+    "name": "conv_out_layer",
+    "type": "conv",
+    "input": [
+      {
+        "name": "silu_out",
+        "shape": [
+          8,
+          160,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "output": [
+      {
+        "name": "conv_out",
+        "shape": [
+          8,
+          3,
+          256,
+          256
+        ],
+        "dtype": "float16",
+        "data_type": "figure"
+      }
+    ],
+    "param": {
+      "weight": {
+        "name": "conv_out_layer.weight",
+        "shape": [
+          3,
+          160,
+          3,
+          3
+        ],
+        "dtype": "uint4",
+        "data_type": "linear_weight"
+      }
+    },
+    "granularity": "MM",
+    "structure": {
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "bias_flag": false,
+      "relu_flag": false
+    }
+  }
+]

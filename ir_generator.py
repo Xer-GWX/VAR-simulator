@@ -456,10 +456,10 @@ class IRGenerator:
         #assert output_dtype in ("int8", "float16")
 
         input_list = list()
-        input_list.append(ActivationInfo(input_name, input_shape, output_dtype, "sequence"))
+        input_list.append(ActivationInfo(input_name, input_shape, output_dtype, "sequence",keepdim=True))
         # self.all_activation_list.add(ActivationInfo(input_name, input_shape, "int8", "sequence"))
         output_list = list()
-        output_list.append(ActivationInfo(output_name, output_shape, output_dtype, "sequence"))
+        output_list.append(ActivationInfo(output_name, output_shape, output_dtype, "sequence",keepdim=True))
         self.all_activation_list.add(ActivationInfo(output_name, output_shape, output_dtype, "sequence"))
         #assert len(list(weight.shape)) == 2
         
@@ -723,6 +723,54 @@ class IRGenerator:
         }
 
         self._set_layer_def(layer_name, "rmsnorm" if rms_flag else "layernorm", input_list, output_list, param_list, granularity, structure_dict)
+    
+    def groupnorm_layer(
+        self,
+        # name
+        layer_name,
+        # input
+        input_name,
+        input_shape,
+        # output
+        output_name,
+        output_shape,
+        output_dtype,
+        # param
+        param_name_prefix,
+        weight,
+        bias,  # may be None
+        # # structure
+        # rms_flag,
+        granularity,  # only misc layer has dynamic_scale_flag
+    ):
+        # assert not dynamic_scale_flag
+        assert output_dtype in ("int8", "float16")
+        assert input_shape == output_shape
+        #assert isinstance(rms_flag, bool)
+
+        input_list = list()
+        input_list.append(ActivationInfo(input_name, input_shape, "float16", "sequence",keepdim=True))
+        
+        output_list = list()
+        output_list.append(ActivationInfo(output_name, output_shape, output_dtype, "sequence",keepdim=True))
+        
+        self.all_activation_list.add(ActivationInfo(output_name, output_shape, output_dtype, "sequence"))
+
+        param_list = list()
+        param_list.append(ParamInfo(param_name_prefix + ".weight", weight, "float16", "groupnorm_weight"))
+        
+        self.all_param_list.add(ParamInfo(param_name_prefix + ".weight", weight, "float16", "groupnorm_weight"))
+
+        bias_flag = bias is not None
+        if bias_flag:
+            param_list.append(ParamInfo(param_name_prefix + ".bias", bias, "float16", "groupnorm_bias"))
+            self.all_param_list.add(ParamInfo(param_name_prefix + ".bias", bias, "float16", "groupnorm_bias"))
+        
+        structure_dict = {
+            "bias_flag": bias_flag,
+        }
+
+        self._set_layer_def(layer_name, "groupnorm", input_list, output_list, param_list, granularity, structure_dict)
 
     def silu_layer(
         self,
@@ -746,10 +794,10 @@ class IRGenerator:
         #assert input_shape == output_shape
 
         input_list = list()
-        input_list.append(ActivationInfo(input_name, input_shape, "float16", "sequence"))
+        input_list.append(ActivationInfo(input_name, input_shape, "float16", "sequence",keepdim=True))
         
         output_list = list()
-        output_list.append(ActivationInfo(output_name, output_shape, output_dtype, "sequence"))
+        output_list.append(ActivationInfo(output_name, output_shape, output_dtype, "sequence",keepdim=True))
         
         self.all_activation_list.add(ActivationInfo(output_name, output_shape, output_dtype, "sequence"))
 
@@ -829,6 +877,62 @@ class IRGenerator:
         structure_dict = {}
 
         self._set_layer_def(layer_name, "softmax", input_list, output_list, param_list, granularity, structure_dict)
+    def reshape_layer(
+        self,
+        # name
+        layer_name,
+        # input
+        input_name,
+        input_tag,  # may not exist
+        input_shape,
+        input_dtype,
+        input_data_type,
+        # output
+        output_name,
+        output_shape,
+        output_data_type,
+        # structure
+        dim,
+        dim_trans,
+        granularity,
+    ):
+        # assert (input_data_type == output_data_type == "sequence") or \
+        #        (input_data_type == "k_cache" and output_data_type == "k_cache_t")
+        # assert dim == [1, 2]
+
+        # assert len(input_shape) >= 3
+        # assert input_shape[0] == output_shape[0]
+        # assert input_shape[1] == output_shape[2]
+        # assert input_shape[2] == output_shape[1]
+        # assert input_shape[3:] == output_shape[3:] if len(input_shape) > 3 else True
+        # assert dim_trans in ("up", "down", "keep")
+
+        input_list = list()
+        output_list = list()
+        if dim_trans == "up":
+            input_act = ActivationInfo(input_name, input_shape, input_dtype, input_data_type, keepdim=True)
+            output_act = ActivationInfo(output_name, output_shape, input_dtype, output_data_type, keepdim=True)
+        elif dim_trans == "down":
+            input_act = ActivationInfo(input_name, input_shape, input_dtype, input_data_type, keepdim=True)
+            output_act = ActivationInfo(output_name, output_shape, input_dtype, output_data_type, keepdim=True)
+        else:
+            input_act = ActivationInfo(input_name, input_shape, input_dtype, input_data_type)
+            output_act = ActivationInfo(output_name, output_shape, input_dtype, output_data_type)
+
+        if input_tag is not None:
+            input_act.add_data_tag(input_tag)
+
+        input_list.append(input_act)
+        output_list.append(output_act)
+
+        self.all_activation_list.add(output_act)
+        
+        param_list = list()
+        structure_dict = {
+            "dim": dim,
+            "dim_trans": dim_trans,
+        }
+        self._set_layer_def(layer_name, "reshape", input_list, output_list, param_list, "memory", structure_dict)
 
     def transpose_layer(
         self,
@@ -863,7 +967,7 @@ class IRGenerator:
         input_list = list()
         output_list = list()
         if dim_trans == "up":
-            input_act = ActivationInfo(input_name, input_shape, input_dtype, input_data_type, keepdim=False)
+            input_act = ActivationInfo(input_name, input_shape, input_dtype, input_data_type, keepdim=True)
             output_act = ActivationInfo(output_name, output_shape, input_dtype, output_data_type, keepdim=True)
         elif dim_trans == "down":
             input_act = ActivationInfo(input_name, input_shape, input_dtype, input_data_type, keepdim=True)
