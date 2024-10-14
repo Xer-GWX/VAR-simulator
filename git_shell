@@ -1,0 +1,10 @@
+git add .
+git commit -m "update"
+git push --set-upstream origin master
+
+update head branch
+
+git branch -m mast master
+git fetch origin
+git branch -u origin/master master
+git remote set-head origin -a
