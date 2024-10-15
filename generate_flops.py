@@ -9,13 +9,16 @@ class DataTensor:
         self.dtype = dtype
 
 class LayerConfig:
-    def __init__(self, name, type, input: list[DataTensor], output: list[DataTensor], param: dict[DataTensor]):
+    def __init__(self, name, type, input: list[DataTensor], output: list[DataTensor], param: dict[DataTensor],structure):
         self.name = name
         self.type = type
         self.input = input # 列表 input[0].shape
         self.output = output
+        self.structure = structure
         self.param = param
         self.flops = None
+        self.param_memory = None
+        self.activation_memory = None
 def extract_number(name, start_idx):
     """Helper function to extract consecutive digits from a string starting at a given index."""
     num_str = ''
@@ -38,7 +41,8 @@ def load_layer_json(file_path) -> list[LayerConfig]:
         input_data = [DataTensor(**d) for d in item['input']]
         output_data = [DataTensor(**d) for d in item['output']]
         param_data = {k: DataTensor(**v) for k, v in item['param'].items()}
-        layer = LayerConfig(name, type, input_data, output_data, param_data)
+        structure = item['structure']
+        layer = LayerConfig(name, type, input_data, output_data, param_data,structure)
         layer_list_prefill.append(layer)
         layer_list.append(layer)
         # Extract 'stagei' and 'blockj' from the name
@@ -59,24 +63,27 @@ def load_layer_json(file_path) -> list[LayerConfig]:
         input_data = [DataTensor(**d) for d in item['input']]
         output_data = [DataTensor(**d) for d in item['output']]
         param_data = {k: DataTensor(**v) for k, v in item['param'].items()}
-        layer = LayerConfig(name, type, input_data, output_data, param_data)
+        structure = item['structure']
+        layer = LayerConfig(name, type, input_data, output_data, param_data,structure)
         layer_list_decode.append(layer)
         layer_list.append(layer)
     decode_flag = False
-    layer_list_prefill = calculate_flops(decode_flag,layer_list_prefill)        
+    layer_list_prefill = calculate_flops(decode_flag,layer_list_prefill) 
+    layer_list_prefill = calculate_memory(decode_flag,layer_list_prefill)       
     decode_flag = True
     layer_list_decode = calculate_flops(decode_flag,layer_list_decode)
-
+    layer_list_decode = calculate_memory(decode_flag,layer_list_decode)       
     flops = []
+    memory = []
     for layer in layer_list_prefill:
-        if layer.flops == None:
-            print(layer.name)
         flops.append(layer.flops)
-        # print(layer.name)
+        memory.append(layer.param_memory + layer.activation_memory)
     for layer in layer_list_decode:
         #if layer.flops == None:
         #print(f"{layer.name},{layer.type}")
         flops.append(layer.flops)
+        memory.append(layer.param_memory + layer.activation_memory)
+
     # sum_flops = [sum(flops[:i+1]) for i in range(len(flops))]
     # print(max(sum_flops)*1e-12)
     return layer_list,layer_list_prefill,layer_list_decode
@@ -86,90 +93,112 @@ def generate_config():
     Layer_configs = load_layer_json(ir_path)
     return Layer_configs
 
+def get_byte(dtensor:DataTensor):
+    result = None
+    if dtensor.dtype == "float16" or dtensor.dtype == "uint4":
+        result = 2
+    elif dtensor.dtype == "int8":
+        result = 1
+    return result
+
 def calculate_memory(decode_flag:bool,layer_list:list[LayerConfig]):
     if decode_flag:
         for layer in layer_list:
             if layer.type == 'MM':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 4
-                layer.flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3] * layer.param['weight'].shape[0]
+                if layer.structure['bias_flag']: layer.param_memory = get_byte(layer.param['weight']) * np.prod(layer.param['weight'].shape)  + get_byte(layer.param['bias']) * np.prod(layer.param['bias'].shape)
+                else: layer.param_memory = get_byte(layer.param['weight']) * layer.param['weight'].shape[1] * layer.param['weight'].shape[2] 
+                layer.activation_memory = get_byte(layer.input[0]) * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2]
         
             elif layer.type == 'MV':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 3
-                layer.flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.param['weight'].shape[2]
+                if layer.structure['bias_flag']: layer.param_memory = get_byte(layer.param['weight']) * np.prod(layer.param['weight'].shape)  + get_byte(layer.param['bias']) * np.prod(layer.param['bias'].shape)
+                else: layer.param_memory = get_byte(layer.param['weight']) * layer.param['weight'].shape[1] * layer.param['weight'].shape[2] 
+                layer.activation_memory = get_byte(layer.input[0]) * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2]
             
             elif layer.type == 'attentionMM':
                 assert len(layer.input)==2
                 assert len(layer.input[0].shape) == 3 and len(layer.input[1].shape) == 3
-                layer.flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[1].shape[2]
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape) + get_byte(layer.input[1]) * np.prod(layer.input[1].shape)          
             
             elif layer.type == 'attentionMV':
                 assert len(layer.input)==2
                 assert len(layer.input[0].shape) == 4 and len(layer.input[1].shape) == 4
-                layer.flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3] * layer.input[1].shape[3]
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape) + get_byte(layer.input[1]) * np.prod(layer.input[1].shape)          
             
             elif layer.type == 'eltwiseadd':
                 assert len(layer.input)==2
                 assert (len(layer.input[0].shape) == 3 and len(layer.input[1].shape) == 3) or (len(layer.input[0].shape) == 4 and len(layer.input[1].shape) == 4)
-                input = layer.input[0] if layer.input[0].shape[1] > layer.input[1].shape[1] else layer.input[1]
-                if len(layer.input[0].shape) == 3:
-                    layer.flops = input.shape[0] * input.shape[1] * input.shape[2] 
-                elif len(layer.input[0].shape) == 4:
-                    layer.flops = input.shape[0] * input.shape[1] * input.shape[2] * input.shape[3]
-
+                #input = layer.input[0] if layer.input[0].shape[1] > layer.input[1].shape[1] else layer.input[1]
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape) + get_byte(layer.input[1]) * np.prod(layer.input[1].shape)
             
             elif layer.type == 'eltwisemul':
                 assert len(layer.input)==2
                 assert len(layer.input[0].shape) == 3 and len(layer.input[1].shape) == 3
-                input = layer.input[0] if layer.input[0].shape[1] > layer.input[1].shape[1] else layer.input[1]
-                layer.flops = input.shape[0] * input.shape[1] * input.shape[2] 
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape) + get_byte(layer.input[1]) * np.prod(layer.input[1].shape)
             
             elif layer.type == 'layernorm':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 3
-                square_sum_flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] 
-                sqrt_flops = 4 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] 
-                div_flops = layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] # vector
-                layer.flops = square_sum_flops + sqrt_flops + div_flops
+                input = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
+                square_sum_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
+                sqrt_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
+                div_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape) # vector
+                layer.param_memory = 0
+                layer.activation_memory = input + square_sum_out + sqrt_out + div_out
             
             elif layer.type == 'gelu':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 3
-                layer.flops = 8 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2]
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)      
             
             elif layer.type == 'silu':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 4
-                layer.flops = 8 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3] 
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)      
 
 
             elif layer.type == 'concat':
-                layer.flops = 0
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape) +get_byte(layer.input[1]) * np.prod(layer.input[1].shape)
             
             elif layer.type == 'transpose':
-                layer.flops = 0
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
             
             elif layer.type == 'softmax':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 3
                 # exp sum div
-                exp_flops = 4 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] 
-                sum_flops = layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2]
-                div_flops = layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] # vector
-                layer.flops = exp_flops + sum_flops + div_flops
+                input = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
+                exp_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)     
+                sum_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)     
+                div_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)     # vector
+                layer.param_memory = 0
+                layer.activation_memory = input + exp_out + sum_out + div_out
             
             elif layer.type == 'conv':
                 assert len(layer.input)==1 #2*B*E**2*K**2*W*H
-                layer.flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[2] * layer.input[0].shape[3] * layer.param['weight'].shape[0] * layer.param['weight'].shape[1] * layer.param['weight'].shape[2] * layer.param['weight'].shape[3]
+                layer.param_memory = get_byte(layer.param['weight']) * np.prod(layer.param['weight'].shape)
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
 
             elif layer.type == 'groupnorm':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 4
-                square_sum_flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3]
-                sqrt_flops = 4 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3]
-                div_flops = layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3]# vector
-                layer.flops = square_sum_flops + sqrt_flops + div_flops
+                input = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
+                square_sum_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
+                sqrt_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
+                div_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape) # vector
+                layer.param_memory = 0
+                layer.activation_memory = input + square_sum_out + sqrt_out + div_out
                 # TODO: 补一下scale
 
     else:
@@ -177,77 +206,89 @@ def calculate_memory(decode_flag:bool,layer_list:list[LayerConfig]):
             if layer.type == 'MM':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 3
-                layer.flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.param['weight'].shape[2]
-        
+                if layer.structure['bias_flag']: layer.param_memory = get_byte(layer.param['weight']) * layer.param['weight'].shape[1] * layer.param['weight'].shape[2] + get_byte(layer.param['bias']) * layer.param['bias'].shape[2]
+                else: layer.param_memory = get_byte(layer.param['weight']) * layer.param['weight'].shape[1] * layer.param['weight'].shape[2] 
+                layer.activation_memory = get_byte(layer.input[0]) * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2]
+
             elif layer.type == 'MV':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 3
-                layer.flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.param['weight'].shape[2]
+                if layer.structure['bias_flag']: layer.param_memory = get_byte(layer.param['weight']) * layer.param['weight'].shape[1] * layer.param['weight'].shape[2] + get_byte(layer.param['bias']) * layer.param['bias'].shape[2]
+                else: layer.param_memory = get_byte(layer.param['weight']) * layer.param['weight'].shape[1] * layer.param['weight'].shape[2] 
+                layer.activation_memory = get_byte(layer.input[0]) * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2]
             
             elif layer.type == 'attentionMM':
                 assert len(layer.input)==2
                 assert len(layer.input[0].shape) == 4 and len(layer.input[1].shape) == 4
-                layer.flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3] * layer.input[1].shape[3]
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3] + get_byte(layer.input[1]) * layer.input[1].shape[0] * layer.input[1].shape[1] * layer.input[1].shape[2] * layer.input[1].shape[3]
             
             elif layer.type == 'attentionMV':
                 assert len(layer.input)==2
                 assert len(layer.input[0].shape) == 4 and len(layer.input[1].shape) == 4
-                layer.flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3] * layer.input[1].shape[3]
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3] + get_byte(layer.input[1]) * layer.input[1].shape[0] * layer.input[1].shape[1] * layer.input[1].shape[2] * layer.input[1].shape[3]
             
             elif layer.type == 'eltwiseadd':
                 assert len(layer.input)==2
                 assert (len(layer.input[0].shape) == 3 and len(layer.input[1].shape) == 3) or (len(layer.input[0].shape) == 4 and len(layer.input[1].shape) == 4)
-                input = layer.input[0] if layer.input[0].shape[1] > layer.input[1].shape[1] else layer.input[1]
-                if len(layer.input[0].shape) == 3:
-                    layer.flops = input.shape[0] * input.shape[1] * input.shape[2] 
-                elif len(layer.input[0].shape) == 4:
-                    layer.flops = input.shape[0] * input.shape[1] * input.shape[2] * input.shape[3]
-
+                #input = layer.input[0] if layer.input[0].shape[1] > layer.input[1].shape[1] else layer.input[1]
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape) + get_byte(layer.input[1]) * np.prod(layer.input[1].shape)
             
             elif layer.type == 'eltwisemul':
                 assert len(layer.input)==2
                 assert len(layer.input[0].shape) == 3 and len(layer.input[1].shape) == 3
-                input = layer.input[0] if layer.input[0].shape[1] > layer.input[1].shape[1] else layer.input[1]
-                layer.flops = input.shape[0] * input.shape[1] * input.shape[2] 
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape) + get_byte(layer.input[1]) * np.prod(layer.input[1].shape)
+
             
             elif layer.type == 'layernorm':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 3
-                square_sum_flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] 
-                sqrt_flops = 4 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] 
-                div_flops = layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] # vector
-                layer.flops = square_sum_flops + sqrt_flops + div_flops
+                input = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
+                square_sum_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
+                sqrt_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
+                div_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape) # vector
+                layer.param_memory = 0
+                layer.activation_memory = input + square_sum_out + sqrt_out + div_out
             
             elif layer.type == 'gelu':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 3
-                layer.flops = 8 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2]
-            
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)      
+
             elif layer.type == 'silu':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 3
-                layer.flops = 8 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] 
-
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)      
 
             elif layer.type == 'concat':
-                layer.flops = 0
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape) +get_byte(layer.input[1]) * np.prod(layer.input[1].shape)
             
             elif layer.type == 'transpose':
-                layer.flops = 0
+                layer.param_memory = 0
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
             
             elif layer.type == 'softmax':
                 assert len(layer.input)==1
                 assert len(layer.input[0].shape) == 4
                 # exp sum div
-                exp_flops = 4 * layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3] 
-                sum_flops = layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3] 
-                div_flops = layer.input[0].shape[0] * layer.input[0].shape[1] * layer.input[0].shape[2] * layer.input[0].shape[3] # vector
-                layer.flops = exp_flops + sum_flops + div_flops
+                input = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
+                exp_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)     
+                sum_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)     
+                div_out = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)     # vector
+                layer.param_memory = 0
+                layer.activation_memory = input + exp_out + sum_out + div_out
             
             elif layer.type == 'conv':
                 assert len(layer.input)==1 #2*B*E**2*K**2*W*H
-                layer.flops = 2 * layer.input[0].shape[0] * layer.input[0].shape[2] * layer.input[0].shape[3] * layer.param['weight'].shape[0] * layer.param['weight'].shape[1] * layer.param['weight'].shape[2] * layer.param['weight'].shape[3]
-        
+                layer.param_memory = get_byte(layer.param['weight']) * np.prod(layer.param['weight'].shape)
+                layer.activation_memory = get_byte(layer.input[0]) * np.prod(layer.input[0].shape)
+
     return layer_list
 
 def calculate_flops(decode_flag:bool,layer_list:list[LayerConfig]):
@@ -414,6 +455,144 @@ def calculate_flops(decode_flag:bool,layer_list:list[LayerConfig]):
         
     return layer_list
 
+def draw_ratio(layer_list: list[LayerConfig],list_type:str):
+    depth = 16 ; bs = 8
+    index, flops = [], []
+    
+    # 用于跟踪重复标签的计数
+    layer_count = {}
+    stage_starts = {}
+    stage_flops = defaultdict(float)
+  
+    for i,layer in enumerate(layer_list):
+        layer_type = layer.name
+        index.append(layer_type)
+        assert layer.flops is not None
+        flops.append(layer.flops/(layer.param_memory + layer.activation_memory))
+        if list_type == "prefill":
+            layer_type = layer.name[:6]  # 仅取前6位
+            stage_flops[layer.name[:6]] += layer.flops/(layer.param_memory + layer.activation_memory)  # 累加 FLOPs 字典可解决
+            
+            if layer_type.startswith('stage') and layer_type[5].isdigit():
+                stage_id = layer_type[:6]  # 例如 'stage0'
+                if stage_id not in stage_starts:
+                    stage_starts[stage_id] = i  # 记录该stage的第一个index
+    stages = list(stage_flops.keys())
+    flops_values = list(stage_flops.values())
+    sum_flops = [sum(flops[:i+1]) for i in range(len(flops))]
+    print(f"[{depth},{bs}]_{list_type}_ratio: {max(sum_flops)*1e-12}")
+
+    # 绘制第一个图：FLOPs
+    plt.figure(figsize=(10, 6))
+    x_positions = np.arange(len(index))
+    plt.bar(x_positions, flops, color='b', alpha=0.7)
+    plt.title(f'{list_type}_ratio_[{depth},{bs}]')
+    plt.xlabel('Layer Index', fontsize=12)
+    plt.ylabel('Ratio', fontsize=12)
+    plt.grid(axis='y')
+    step = 100  # x轴刻度步长
+    plt.xticks(ticks=range(0, len(index), step), labels=x_positions[::step], rotation=90, fontsize=3)
+    plt.tight_layout()
+    plt.savefig(f"./[{depth},{bs}]_{list_type}_ratio.png", dpi=600, bbox_inches='tight')
+    plt.close()
+
+    # # 绘制第二个图：累积 FLOPs (sum_flops)
+    # plt.figure(figsize=(10, 6))
+    # plt.plot(x_positions, sum_flops, marker='o', color='b', linestyle='-')
+    # plt.title(f'{list_type}_Cumulative FLOPs_[{depth},{bs}]')
+    # plt.xlabel('Layer Index', fontsize=12)
+    # plt.ylabel('Cumulative FLOPs', fontsize=12)
+    # plt.grid(axis='y')
+    # if list_type == "prefill" or list_type == "all":
+    #     for stage, start_idx in stage_starts.items():
+    #         plt.text(start_idx, sum_flops[start_idx], stage[5], fontsize=12, color='red', ha='center', va='bottom')
+    # plt.tight_layout()
+    # plt.savefig(f"./[{depth},{bs}]_{list_type}_Cumulative_FLOPs.png", dpi=600, bbox_inches='tight')
+    # plt.close()
+
+    # # 绘制第三个图：stage_flops
+    # if list_type == "prefill":
+    #     plt.figure(figsize=(10, 6))
+    #     stage_positions = np.arange(len(stages))
+    #     plt.bar(stages, flops_values, color='b', alpha=0.7)
+    #     plt.title(f'{list_type}_Total Ratio by Stage_[{depth},{bs}]')
+    #     plt.xlabel('Stage', fontsize=12)
+    #     plt.ylabel('Total FLOPs', fontsize=12)
+    #     plt.xticks(stage_positions, stages, rotation=45, fontsize=10)
+    #     plt.grid(axis='y')
+    #     plt.tight_layout()
+    #     plt.savefig(f"./[{depth},{bs}]_{list_type}_Total_FLOPs_by_Stage.png", dpi=300, bbox_inches='tight')
+    #     plt.close() 
+
+def draw_memory(layer_list: list[LayerConfig],list_type:str):
+    depth = 16 ; bs = 8
+    index, memory = [], []
+    
+    # 用于跟踪重复标签的计数
+    layer_count = {}
+    stage_starts = {}
+    stage_memory = defaultdict(float)
+  
+    for i,layer in enumerate(layer_list):
+        layer_type = layer.name
+        index.append(layer_type)
+        assert layer.param_memory is not None and layer.activation_memory is not None
+        memory.append(layer.param_memory + layer.activation_memory)
+        if list_type == "prefill":
+            layer_type = layer.name[:6]  # 仅取前6位
+            stage_memory[layer.name[:6]] += layer.param_memory + layer.activation_memory  # 累加 FLOPs 字典可解决
+            
+            if layer_type.startswith('stage') and layer_type[5].isdigit():
+                stage_id = layer_type[:6]  # 例如 'stage0'
+                if stage_id not in stage_starts:
+                    stage_starts[stage_id] = i  # 记录该stage的第一个index
+    stages = list(stage_memory.keys())
+    memorys_values = list(stage_memory.values())
+    sum_memory = [sum(memory[:i+1]) for i in range(len(memory))]
+    print(f"[{depth},{bs}]_{list_type}_Memory: {max(sum_memory)/1024/1024/1024}GB")
+
+    # 绘制第一个图：FLOPs
+    plt.figure(figsize=(10, 6))
+    x_positions = np.arange(len(index))
+    plt.bar(x_positions, memory, color='b', alpha=0.7)
+    plt.title(f'{list_type}_Memory_[{depth},{bs}]')
+    plt.xlabel('Layer Index', fontsize=12)
+    plt.ylabel('Memory', fontsize=12)
+    plt.grid(axis='y')
+    step = 100  # x轴刻度步长
+    plt.xticks(ticks=range(0, len(index), step), labels=x_positions[::step], rotation=90, fontsize=3)
+    plt.tight_layout()
+    plt.savefig(f"./[{depth},{bs}]_{list_type}_Memory.png", dpi=600, bbox_inches='tight')
+    plt.close()
+
+    # 绘制第二个图：累积 FLOPs (sum_Memory)
+    plt.figure(figsize=(10, 6))
+    plt.plot(x_positions, sum_memory, marker='o', color='b', linestyle='-')
+    plt.title(f'{list_type}_Cumulative Memory_[{depth},{bs}]')
+    plt.xlabel('Layer Index', fontsize=12)
+    plt.ylabel('Cumulative Memory', fontsize=12)
+    plt.grid(axis='y')
+    if list_type == "prefill" or list_type == "all":
+        for stage, start_idx in stage_starts.items():
+            plt.text(start_idx, sum_memory[start_idx], stage[5], fontsize=12, color='red', ha='center', va='bottom')
+    plt.tight_layout()
+    plt.savefig(f"./[{depth},{bs}]_{list_type}_Cumulative_Memory.png", dpi=600, bbox_inches='tight')
+    plt.close()
+
+    # 绘制第三个图：stage_Memory
+    if list_type == "prefill":
+        plt.figure(figsize=(10, 6))
+        stage_positions = np.arange(len(stages))
+        plt.bar(stages, memorys_values, color='b', alpha=0.7)
+        plt.title(f'{list_type}_Total Memory by Stage_[{depth},{bs}]')
+        plt.xlabel('Stage', fontsize=12)
+        plt.ylabel('Total Memory', fontsize=12)
+        plt.xticks(stage_positions, stages, rotation=45, fontsize=10)
+        plt.grid(axis='y')
+        plt.tight_layout()
+        plt.savefig(f"./[{depth},{bs}]_{list_type}_Total_Memory_by_Stage.png", dpi=300, bbox_inches='tight')
+        plt.close()
+
 def draw_flops(layer_list: list[LayerConfig],list_type:str):
     depth = 16 ; bs = 8
     index, flops = [], []
@@ -509,8 +688,9 @@ def draw_analysis(layer_list, layer_list_prefill, layer_list_decode, list_type="
     if analyze_type == "flops":
         draw_flops(selected_list,list_type)
     elif analyze_type == "memory":
-        #draw_memory(selected_list)
-        pass
+        draw_memory(selected_list,list_type)
+    elif analyze_type == "ratio":
+        draw_ratio(selected_list,list_type)
     else:
         raise ValueError("Invalid analyze_type. Choose 'flops' or 'memory'.")
 
@@ -518,7 +698,15 @@ def draw_analysis(layer_list, layer_list_prefill, layer_list_decode, list_type="
 
 if __name__ == "__main__":
     layer_list,layer_list_prefill,layer_list_decode = generate_config()
-    draw_analysis(layer_list,layer_list_prefill,layer_list_decode,"all","flops")
+    # draw_analysis(layer_list,layer_list_prefill,layer_list_decode,"all","memory")
+    # draw_analysis(layer_list,layer_list_prefill,layer_list_decode,"all","flops")
+    draw_analysis(layer_list,layer_list_prefill,layer_list_decode,"all","ratio")
+    # draw_analysis(layer_list,layer_list_prefill,layer_list_decode,"prefill","memory")
+    # draw_analysis(layer_list,layer_list_prefill,layer_list_decode,"prefill","flops")
+    draw_analysis(layer_list,layer_list_prefill,layer_list_decode,"prefill","ratio")
+    # draw_analysis(layer_list,layer_list_prefill,layer_list_decode,"decode","memory")
+    # draw_analysis(layer_list,layer_list_prefill,layer_list_decode,"decode","flops")
+    draw_analysis(layer_list,layer_list_prefill,layer_list_decode,"decode","ratio")
     #draw_flops(layer_list) 
 
 
